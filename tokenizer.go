@@ -7,9 +7,11 @@ package tokenizer
 //
 // The following encoding formats are supported:
 // - Cl100kBase
+// - O200kBase
 // - R50kBase
 // - P50kBase
 // - P50kEdit
+// - MistralTekken
 //
 // Alternatively you can request a tokenizer using OpenAI's model name, the
 // following OpenAI models are supported:
@@ -47,6 +49,10 @@ package tokenizer
 // - TextDavinciEdit001
 // - CodeDavinciEdit001
 //
+// Or use the Mistral name:
+// - MistralNemo
+// - MistralMixtral
+//
 // Usage Example
 //
 // Here is an example of how to encode a string using the `ForModel` function:
@@ -74,8 +80,8 @@ package tokenizer
 //}
 
 import (
-	"strings"
 	"errors"
+	"strings"
 
 	"github.com/tiktoken-go/tokenizer/codec"
 )
@@ -130,17 +136,24 @@ const (
 	TextDavinciEdit001       Model = "text-davinci-edit-001"
 	CodeDavinciEdit001       Model = "code-davinci-edit-001"
 	GPT2                     Model = "gpt2"
+
+	// Mistral
+	MistralNemo Model = "mistral_tekken"
 )
 
 type Encoding string
 
 const (
+	// OpenAI
 	GPT2Enc    Encoding = "gpt2"
 	R50kBase   Encoding = "r50k_base"
 	P50kBase   Encoding = "p50k_base"
 	P50kEdit   Encoding = "p50k_edit"
 	Cl100kBase Encoding = "cl100k_base"
 	O200kBase  Encoding = "o200k_base"
+
+	// Mistral
+	MistralTekken Encoding = "mistral_tekken"
 )
 
 var modelPrefixToEncoding map[Model]Encoding = map[Model]Encoding{
@@ -171,6 +184,8 @@ func Get(encoding Encoding) (Codec, error) {
 		return codec.NewP50kBase(), nil
 	case P50kEdit:
 		return codec.NewP50kEdit(), nil
+	case MistralTekken:
+		return codec.NewMistralTekken(), nil
 	default:
 		return nil, ErrEncodingNotSupported
 	}
@@ -204,6 +219,10 @@ func ForModel(model Model) (Codec, error) {
 
 	case GPT2:
 		return Get(GPT2Enc)
+
+	// Mistral
+	case MistralNemo:
+		return Get(MistralTekken)
 	default:
 		for prefix, enc := range modelPrefixToEncoding {
 			if strings.HasPrefix(string(model), string(prefix)) {

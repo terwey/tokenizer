@@ -69,6 +69,16 @@ var (
 				{text: "We know what we are, but know not what we may be.", ids: []uint{1135, 760, 644, 356, 389, 11, 475, 760, 407, 644, 356, 743, 307, 13}},
 			},
 		},
+		{
+			encoding: tokenizer.MistralTekken,
+			data: []testTokenizerData{
+				{text: "hello world", ids: []uint{28706, 3304}},
+				{text: "hello  world", ids: []uint{28706, 32, 3304}},
+				{text: "hello   world", ids: []uint{28706, 256, 3304}},
+				{text: "supercalifragilistic", ids: []uint{20716, 3526, 391, 2185, 318, 4744}},
+				{text: "We know what we are, but know not what we may be.", ids: []uint{3268, 1840, 1549, 729, 584, 44, 809, 1840, 605, 1549, 729, 1188, 402, 46}},
+			},
+		},
 	}
 )
 

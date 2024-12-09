@@ -13,6 +13,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/tiktoken-go/tokenizer/internal/mistral"
 )
 
 const (
@@ -71,9 +73,25 @@ func generateVocabulary(w io.Writer, mapName string, uri string) {
 	fmt.Fprintf(w, "func %sInit() {\n", mapName)
 	fmt.Fprintf(w, "%s = vocab{\n", mapName)
 
-	scanner := bufio.NewScanner(resp.Body)
+	var vocab io.Reader
+
+	if mapName == "mistralTekkenVocab" {
+		tekkenJSON, err := mistral.UnmarshalTekken(resp.Body)
+		if err != nil {
+			log.Fatalf("error unmarshalling tekken json: %v", err)
+		}
+
+		vocab = tekkenJSON.ToTikToken()
+	} else {
+		vocab = resp.Body
+	}
+
+	scanner := bufio.NewScanner(vocab)
 	for scanner.Scan() {
 		line := scanner.Text()
+		if line == "" {
+			continue
+		}
 
 		wordInput, idInput, ok := strings.Cut(line, " ")
 		if !ok {
@@ -121,6 +139,13 @@ func getConfig(encoding string) config {
 			mapName:  "p50kBaseVocab",
 			url:      "https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken",
 			filename: "p50k_base_vocab.go",
+		}
+	// mistral-nemo and mixtral-8b
+	case "mistral_tekken":
+		return config{
+			mapName:  "mistralTekkenVocab",
+			url:      "https://github.com/mistralai/mistral-common/raw/refs/heads/main/src/mistral_common/data/tekken_240911.json",
+			filename: "mistral_tekken_vocab.go",
 		}
 	default:
 		log.Fatal("config not found")
